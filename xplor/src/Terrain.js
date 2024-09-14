@@ -4,6 +4,10 @@ import { createTerrainDetail } from './TerrainDetails';
 import { adjustColor } from './utils';
 import { setupInteraction } from './scrolling';
 import { NUM_NOISE_MAPS, TILE_SIZE, CHUNK_SIZE, VISIBLE_TILES, DETAIL_CHANCE, LOAD_DISTANCE, TERRAIN_SCALE, TEXTURE_SCALE } from './configs';
+
+const OFFSET_X = 300; // Offset for the second noise map
+const OFFSET_Y = 200; // Offset for the second noise map
+
 export const TERRAIN_INFO = [
     {
         type: 'LAKE',
@@ -32,6 +36,20 @@ export const TERRAIN_INFO = [
     }
 ];
 
+function determineTerrainType(primaryNoise, secondaryNoise) {
+    let primaryType = getTerrainType(primaryNoise);
+    let secondaryType = getTerrainType(secondaryNoise);
+
+    // Adjust terrain types based on secondary noise influence
+    if (primaryType === 'SAND' && secondaryType === 'MOUNTAIN') {
+        return 'MOUNTAIN'; // Sand near high secondary noise becomes mountains
+    } else if (primaryType === 'LAKE' && secondaryType === 'FOREST') {
+        return 'GRASS'; // Lakes with high secondary noise grow grass islands
+    } else if ((primaryType === 'FOREST' && secondaryType === 'GRASS') || (primaryType === 'GRASS' && secondaryType === 'FOREST')) {
+        return secondaryType; // Swap forest and grass based on secondary noise
+    }
+    return primaryType; // Default to primary type if no special conditions are met
+}
 
 export function getTerrainType(noise) {
     return TERRAIN_INFO.find(terrain => noise < terrain.threshold).type;
@@ -47,7 +65,43 @@ export function getTerrainColor(terrain, noise) {
     ]);
 }
 
+// Updated generateChunk function to use determineTerrainType
+export function generateChunk(chunkX, chunkY, tileCache, noiseMaps, app, chunks, simplex, worldContainer, detailCache) {
+    const chunkKey = `${chunkX},${chunkY}`;
+    if (chunks[chunkKey]) return;
 
+    const chunkContainer = new PIXI.Container();
+    chunkContainer.position.set(chunkX * CHUNK_SIZE * TILE_SIZE, chunkY * CHUNK_SIZE * TILE_SIZE);
+
+    for (let x = 0; x < CHUNK_SIZE; x++) {
+        for (let y = 0; y < CHUNK_SIZE; y++) {
+            const worldX = chunkX * CHUNK_SIZE + x;
+            const worldY = chunkY * CHUNK_SIZE + y;
+
+            const primaryNoise = simplex(worldX * TERRAIN_SCALE, worldY * TERRAIN_SCALE);
+            const secondaryNoise = simplex((worldX * TERRAIN_SCALE) + OFFSET_X, (worldY * TERRAIN_SCALE) + OFFSET_Y);
+
+            const terrain = determineTerrainType(primaryNoise, secondaryNoise);
+            const baseColor = getTerrainColor(terrain, (primaryNoise + 1) / 2);
+
+            const tile = createTexturedTile(baseColor, tileCache, noiseMaps, app);
+            tile.position.set(x * TILE_SIZE, y * TILE_SIZE);
+
+            chunkContainer.addChild(tile);
+
+            if (Math.random() < DETAIL_CHANCE) {
+                const detail = createTerrainDetail(terrain, detailCache);
+                if (detail) {
+                    detail.position.set(x * TILE_SIZE, y * TILE_SIZE);
+                    chunkContainer.addChild(detail);
+                }
+            }
+        }
+    }
+
+    worldContainer.addChild(chunkContainer);
+    chunks[chunkKey] = chunkContainer;
+}
 
 
 export function createTexturedTile(baseColor, tileCache, noiseMaps, app) {
@@ -82,43 +136,4 @@ export function createTexturedTile(baseColor, tileCache, noiseMaps, app) {
     tileCache.set(cacheKey, texture);
 
     return new PIXI.Sprite(texture);
-}
-
-
-
-export function generateChunk(chunkX, chunkY, tileCache, noiseMaps, app, chunks, simplex, worldContainer, detailCache) {
-    const chunkKey = `${chunkX},${chunkY}`;
-    if (chunks[chunkKey]) return;
-
-    const chunkContainer = new PIXI.Container();
-    chunkContainer.position.set(chunkX * CHUNK_SIZE * TILE_SIZE, chunkY * CHUNK_SIZE * TILE_SIZE);
-
-    for (let x = 0; x < CHUNK_SIZE; x++) {
-        for (let y = 0; y < CHUNK_SIZE; y++) {
-            const worldX = chunkX * CHUNK_SIZE + x;
-            const worldY = chunkY * CHUNK_SIZE + y;
-
-            const terrainNoise = simplex(worldX * TERRAIN_SCALE, worldY * TERRAIN_SCALE);
-            const terrain = getTerrainType(terrainNoise);
-
-            const textureNoise = simplex(worldX * TEXTURE_SCALE, worldY * TEXTURE_SCALE);
-            const baseColor = getTerrainColor(terrain, (textureNoise + 1) / 2);
-
-            const tile = createTexturedTile(baseColor, tileCache, noiseMaps, app);
-            tile.position.set(x * TILE_SIZE, y * TILE_SIZE);
-
-            chunkContainer.addChild(tile);
-
-            if (Math.random() < DETAIL_CHANCE) {
-                const detail = createTerrainDetail(terrain, detailCache);
-                if (detail) {
-                    detail.position.set(x * TILE_SIZE, y * TILE_SIZE);
-                    chunkContainer.addChild(detail);
-                }
-            }
-        }
-    }
-
-    worldContainer.addChild(chunkContainer);
-    chunks[chunkKey] = chunkContainer;
 }
