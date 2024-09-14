@@ -99,6 +99,6 @@ export function createTerrainDetail(terrain, detailCache) {
 
   const texture = detailCache.get(selectedDetail);
   const sprite = new PIXI.Sprite(texture);
-  sprite.scale.set(2);
+  sprite.scale.set(3.5);
   return sprite;
 }
