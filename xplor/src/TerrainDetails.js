@@ -64,7 +64,7 @@ const TERRAIN_DETAIL_MAPPING = [
   { terrain: 'FOREST', details: ['flower', 'stick', 'bush'], weights: [0.4, 0.2, 0.4] },
   { terrain: 'MOUNTAIN', details: ['stone', 'moreStones'], weights: [0.7, 0.3] },
   { terrain: 'SAND', details: ['stick', 'bush'], weights: [0.8, 0.2] },
-  { terrain: 'LAKE', details: ['lilyPad',"none"], weights: [0.3,0.9] }
+  { terrain: 'LAKE', details: ['lilyPad',"none"], weights: [0.4,0.6] }
 ];
 
 const DEFAULT_DETAIL = 'stick';
