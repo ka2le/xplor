@@ -120,8 +120,8 @@ export function createTexturedTile(baseColor, tileCache, noiseMaps, app) {
         for (let x = 0; x < TILE_SIZE; x++) {
             const noise = noiseMap[y * TILE_SIZE + x];
             const adjustedColor = adjustColor(baseColor, noise);
-            const waveX = Math.sin(y / 5) * 1.5;
-            const waveY = Math.cos(x / 5) * 3;
+            const waveX = Math.sin(y / 7.4) * 2.74;
+            const waveY = Math.cos(x / 7.4) * 2.7;
 
             graphics.beginFill(adjustedColor, 1);
             graphics.drawRect(Math.round(x + waveX), Math.round(y + waveY), 1, 1);
