@@ -3,7 +3,7 @@ export function adjustColor(baseColor, noise) {
     const g = (baseColor >> 8) & 0xFF;
     const b = baseColor & 0xFF;
 
-    const factor = 0.8 + noise * 0.4;
+    const factor = 0.95 + noise * 0.1;
 
     const newR = Math.min(255, Math.max(0, Math.floor(r * factor)));
     const newG = Math.min(255, Math.max(0, Math.floor(g * factor)));
