@@ -57,7 +57,7 @@ export const TERRAIN_INFO = [
   {
     type: 'SNOW',
     thresholds: [
-      { 2: [0.7, Infinity] }  // Snow biome, overrides everything
+      { 2: [0.6, Infinity] }  // Snow biome
     ],
     colors: { light: 0xFFFFFF, dark: 0xF0F0F0 }
   }

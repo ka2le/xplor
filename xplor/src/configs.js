@@ -7,5 +7,5 @@ export const NUM_NOISE_MAPS = 10;
 export const DETAIL_CHANCE = 0.15;
 
 // Noise settings
-export  const TERRAIN_SCALE = 0.03;
+export  const TERRAIN_SCALE = 0.05;
 export const TEXTURE_SCALE = 0.1;
