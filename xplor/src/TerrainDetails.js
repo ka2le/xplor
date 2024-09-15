@@ -102,3 +102,4 @@ export function createTerrainDetail(terrain, detailCache) {
   sprite.scale.set(3.5);
   return sprite;
 }
+
