@@ -18,24 +18,26 @@ export const TERRAIN_INFO = [
   {
     type: 'LAKE',
     thresholds: [
-      { 0: [-0.6, -0.3] },
-      { 0: [-0.9, 0], 2: [-1, -0.8] }  //Lake biome
+      { 0: [-0.5, -0.3] },
+      { 0: [0.4, 0.8], 2: [-1, -0.6] }  //Lake biome
     ],
     colors: { light: 0x87CEFA, dark: 0x82C7F5 }
   },
   {
     type: 'DEEP LAKE',
     thresholds: [
-      { 0: [-Infinity, -0.6] },
-      { 0: [-Infinity, -0.9], 2: [-1, -0.8] }  //Lake biome
+      { 0: [-Infinity, -0.5] },
+      { 0: [-Infinity, 0.4], 2: [-1, -0.6] }  //Lake biome
     ],
-    colors: { light: 0x456A80, dark: 0x82C7F5 }
+    colors: { light: 0x3da8eb, dark: 0x3da8eb}
   },
   {
     type: 'SAND',
     thresholds: [
       { 0: [-0.3, -0.1] },
-      { 0: [0, 0.1], 2: [-1, -0.8] }  // Sand islands in lakes
+      { 0: [0.8, 1], 2: [-1, -0.6] },  // Sand islands in ocean biome
+      { 0: [-0.1, 1], 1: [-0.5, 0.3], 2: [-0.6, -0.5] },  // Sand edges to ocean biome
+      { 0: [0.7, 1],  2: [-0.6, -0.5] },  // Sand edges to ocean biome
 
     ],
     colors: { light: 0xFAEBD7, dark: 0xFAEBD7, secondary: 0xFAEBD7 }
@@ -190,11 +192,14 @@ export function generateChunk(chunkX, chunkY, tileCache, noiseMaps, app, chunks,
 
 function getShadedTerrainColor(terrain, noise) {
   const { light, dark } = TERRAIN_INFO.find(t => t.type === terrain).colors;
-  return PIXI.utils.rgb2hex([
-    ((light >> 16) + ((dark >> 16) - (light >> 16)) * noise) / 255,
-    (((light >> 8) & 0xFF) + (((dark >> 8) & 0xFF) - ((light >> 8) & 0xFF)) * noise) / 255,
-    ((light & 0xFF) + ((dark & 0xFF) - (light & 0xFF)) * noise) / 255
-  ]);
+
+  const r = ((light >> 16) + ((dark >> 16) - (light >> 16)) * noise) / 255;
+  const g = (((light >> 8) & 0xFF) + (((dark >> 8) & 0xFF) - ((light >> 8) & 0xFF)) * noise) / 255;
+  const b = ((light & 0xFF) + ((dark & 0xFF) - (light & 0xFF)) * noise) / 255;
+
+  // Create a PIXI Color object and convert it to a number
+  const color = new PIXI.Color([r, g, b]);
+  return color.toNumber();
 }
 
 

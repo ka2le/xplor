@@ -40,7 +40,6 @@ export function generateTerrainDetails(detailCache) {
       const url = URL.createObjectURL(blob);
       texture = PIXI.Texture.from(url);
     } else if (detail.type === 'image') {
-      console.log("loading image: ", detail.content);
       // Set crossOrigin handling for image
       texture = PIXI.Texture.from(detail.content);
       texture.baseTexture.on('error', (error) => {
