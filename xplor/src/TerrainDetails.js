@@ -1,26 +1,45 @@
 import * as PIXI from 'pixi.js';
-import {DETAIL_CHANCE, TILE_SIZE} from './configs';
+import { DETAIL_CHANCE, TILE_SIZE } from './configs';
 
 const DEFAULT_TERRAIN_SCALE = 3;
 // Pixel art terrain details
 const url = window.location.origin + "/xplor";
 const terrainDetails = {
   stone: { type: 'image', content: `${url}/images/stone.png`, scale: 0.14 },
-  flower: { type: 'image', content: `${url}/images/flower2.png`, scale: 0.14 },
+  flower1: { type: 'image', content: `${url}/images/flower1.png`, scale: 0.14 },
+  flower2: { type: 'image', content: `${url}/images/flower2.png`, scale: 0.14 },
+  flower3: { type: 'image', content: `${url}/images/flower3.png`, scale: 0.14 },
+  flower4: { type: 'image', content: `${url}/images/flower4.png`, scale: 0.14 },
+  flower5: { type: 'image', content: `${url}/images/flower5.png`, scale: 0.14 },
+  flower6: { type: 'image', content: `${url}/images/flower6.png`, scale: 0.14 },
   stick: { type: 'image', content: `${url}/images/stick.png`, scale: 0.14 },
   lilyPad: { type: 'image', content: `${url}/images/lilypad.png`, scale: 0.14 },
   bush: { type: 'image', content: `${url}/images/tree.png`, scale: 0.26 },
+  reed1: { type: 'image', content: `${url}/images/reed1.png`, scale: 0.13 },
+  reed2: { type: 'image', content: `${url}/images/reed2.png`, scale: 0.13 },
   moreStones: { type: 'image', content: `${url}/images/stone.png`, scale: 0.14 },
   none: { type: 'svg', content: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">  </svg>` }
 };
 
 // New mapping array for terrain details
 const TERRAIN_DETAIL_MAPPING = [
-  { terrain: 'GRASS', details: ['flower', 'stick', 'bush'], weights: [0.4, 0.2, 0.4], },
-  { terrain: 'FOREST', details: ['bush'], weights: [1],  detailChance: 0.9 },
+  {
+    terrain: 'GRASS', details:
+      [
+        'flower1',
+        'flower2',
+        'flower3',
+        'flower4',
+        'flower5',
+        'flower6',
+        'stick',
+        'bush'],
+    weights: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2, 0.2], detailCache: 0.3
+  },
+  { terrain: 'FOREST', details: ['bush'], weights: [1], detailChance: 0.9 },
   { terrain: 'MOUNTAIN', details: ['stone', 'moreStones'], weights: [0.7, 0.3] },
   { terrain: 'SAND', details: ['stick', 'bush'], weights: [0.8, 0.2] },
-  { terrain: 'LAKE', details: ['lilyPad', "none"], weights: [0.4, 0.6] },
+  { terrain: 'LAKE', details: ['lilyPad', "reed1", "reed2"], weights: [0.2, 0.4, 0.4], detailChance: 0.3 },
   { terrain: 'DEEP LAKE', details: ['lilyPad', "none"], weights: [0, 1] },
   { terrain: 'MOUNTAINPEAK', details: ['stone', 'moreStones'], weights: [0.7, 0.3] },
   { terrain: 'SNOW', details: ['none'], weights: [1] },
@@ -52,7 +71,7 @@ export function generateTerrainDetails(detailCache) {
 export function createTerrainDetail(terrain, detailCache, x, y, chunkContainer) {
   // Find terrain-specific mapping or fallback to default mapping
   const terrainMapping = TERRAIN_DETAIL_MAPPING.find(t => t.terrain === terrain) || { details: [DEFAULT_DETAIL], weights: [1] };
-  
+
   // Determine the detail chance (use terrain-specific if present, else fallback to default)
   const detailChance = terrainMapping.detailChance !== undefined ? terrainMapping.detailChance : DETAIL_CHANCE;
 
@@ -84,7 +103,7 @@ export function createTerrainDetail(terrain, detailCache, x, y, chunkContainer) 
   const sprite = new PIXI.Sprite(texture);
 
   // Apply scaling to the sprite
-  const scale = terrainDetails[selectedDetail]?.scale || DEFAULT_TERRAIN_SCALE;  
+  const scale = terrainDetails[selectedDetail]?.scale || DEFAULT_TERRAIN_SCALE;
   sprite.scale.set(scale);
 
   // Set position based on tile size and passed coordinates
