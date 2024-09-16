@@ -80,7 +80,8 @@ export const TERRAIN_INFO = [
   {
     type: 'ICE',
     thresholds: [
-      { 0: [-1, -0.7], 2: [0.6, Infinity] }  // Snow biome Ice Lakes
+      { 0: [-1, -0.7], 2: [0.6, Infinity] },  // Snow biome Ice Lakes
+      { 0: [-1, -0.1], 2: [0.5,0.6] }  // Snow biome Edge Ice Lakes
     ],
     colors: { light: 0xBDDEEC, dark: 0xD7EBF3 }
   },
