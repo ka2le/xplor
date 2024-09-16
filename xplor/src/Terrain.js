@@ -18,10 +18,18 @@ export const TERRAIN_INFO = [
   { 
     type: 'LAKE', 
     thresholds: [
-      { 0: [-Infinity, -0.3] },
-      { 0: [-Infinity, 0], 2: [-1, -0.8] }  //Lake biome
+      { 0: [-0.6, -0.3] },
+      { 0: [-0.9, 0], 2: [-1, -0.8] }  //Lake biome
     ],
     colors: { light: 0x87CEFA, dark: 0x82C7F5 }
+  },
+  { 
+    type: 'DEEP LAKE', 
+    thresholds: [
+      { 0: [-Infinity, -0.6] },
+      { 0: [-Infinity, -0.9], 2: [-1, -0.8] }  //Lake biome
+    ],
+    colors: { light: 0x456A80, dark: 0x82C7F5 }
   },
   { 
     type: 'SAND', 
@@ -50,9 +58,16 @@ export const TERRAIN_INFO = [
   { 
     type: 'MOUNTAIN', 
     thresholds: [
-      { 0: [0.4, Infinity] }
+      { 0: [0.4, 0.85] }
     ],
     colors: { light: 0xBEBEBE, dark: 0xB4B4B4 }
+  },
+  { 
+    type: 'MOUNTAINPEAK', 
+    thresholds: [
+      { 0: [0.85, Infinity] }
+    ],
+    colors: { light: 0x626262, dark: 0x626262 }
   },
   {
     type: 'SNOW',

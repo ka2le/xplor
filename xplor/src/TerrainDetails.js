@@ -2,13 +2,14 @@ import * as PIXI from 'pixi.js';
 
 const DEFAULT_TERRAIN_SCALE = 3;
 // Pixel art terrain details
+const url=window.location.origin+"/xplor";
 const terrainDetails = {
-  stone: { type: 'image', content: `images/stone.png`, scale: 0.14 },
-  flower: { type: 'image', content: `images/flower2.png`, scale: 0.14 },
-  stick: { type: 'image', content: `images/stick.png`, scale: 0.14 },
-  lilyPad: { type: 'image', content: `images/lilypad.png`, scale: 0.14 },
-  bush: { type: 'image', content: `images/tree.png`, scale: 0.26 },
-  moreStones: { type: 'image', content: `images/stone.png`, scale: 0.14 },
+  stone: { type: 'image', content: `${url}/images/stone.png`, scale: 0.14 },
+  flower: { type: 'image', content: `${url}/images/flower2.png`, scale: 0.14 },
+  stick: { type: 'image', content: `${url}/images/stick.png`, scale: 0.14 },
+  lilyPad: { type: 'image', content: `${url}/images/lilypad.png`, scale: 0.14 },
+  bush: { type: 'image', content: `${url}/images/tree.png`, scale: 0.26 },
+  moreStones: { type: 'image', content: `${url}/images/stone.png`, scale: 0.14 },
   none: { type: 'svg', content: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">  </svg>` }
 };
 
@@ -24,6 +25,7 @@ const TERRAIN_DETAIL_MAPPING = [
 const DEFAULT_DETAIL = 'stick';
 
 export function generateTerrainDetails(detailCache) {
+  const BASE_URL = window.location.origin+"/xplor";
   for (const [name, detail] of Object.entries(terrainDetails)) {
     let texture;
     if (detail.type === 'svg') {
@@ -31,7 +33,12 @@ export function generateTerrainDetails(detailCache) {
       const url = URL.createObjectURL(blob);
       texture = PIXI.Texture.from(url);
     } else if (detail.type === 'image') {
+      console.log("loading image: ", detail.content);
+      // Set crossOrigin handling for image
       texture = PIXI.Texture.from(detail.content);
+      texture.baseTexture.on('error', (error) => {
+        console.error('Error loading texture:', detail.content, error);
+      });
     }
     detailCache.set(name, texture);
   }
