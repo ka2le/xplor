@@ -5,18 +5,21 @@ const DEFAULT_TERRAIN_SCALE = 3;
 // Pixel art terrain details
 const url = window.location.origin + "/xplor";
 const terrainDetails = {
-  stone: { type: 'image', content: `${url}/images/stone.png`, scale: 0.14 },
+  stone: { type: 'image', content: `${url}/images/stone.png`, scale: 0.22 },
   flower1: { type: 'image', content: `${url}/images/flower1.png`, scale: 0.14 },
-  flower2: { type: 'image', content: `${url}/images/flower2.png`, scale: 0.14 },
-  flower3: { type: 'image', content: `${url}/images/flower3.png`, scale: 0.14 },
-  flower4: { type: 'image', content: `${url}/images/flower4.png`, scale: 0.14 },
-  flower5: { type: 'image', content: `${url}/images/flower5.png`, scale: 0.14 },
-  flower6: { type: 'image', content: `${url}/images/flower6.png`, scale: 0.14 },
+  flower2: { type: 'image', content: `${url}/images/flower2.png`, scale: 0.11 },
+  flower3: { type: 'image', content: `${url}/images/flower3.png`, scale: 0.11 },
+  flower4: { type: 'image', content: `${url}/images/flower4.png`, scale: 0.11 },
+  flower5: { type: 'image', content: `${url}/images/flower5.png`, scale: 0.11 },
+  flower6: { type: 'image', content: `${url}/images/flower6.png`, scale: 0.11 },
   stick: { type: 'image', content: `${url}/images/stick.png`, scale: 0.14 },
-  lilyPad: { type: 'image', content: `${url}/images/lilypad.png`, scale: 0.14 },
-  bush: { type: 'image', content: `${url}/images/tree.png`, scale: 0.26 },
-  reed1: { type: 'image', content: `${url}/images/reed1.png`, scale: 0.13 },
-  reed2: { type: 'image', content: `${url}/images/reed2.png`, scale: 0.13 },
+  lilyPad: { type: 'image', content: `${url}/images/lilypad.png`, scale: 0.16 },
+  tree1: { type: 'image', content: `${url}/images/tree1.png`, scale: 0.29 },
+  tree2: { type: 'image', content: `${url}/images/tree2.png`, scale: 0.29 },
+  tree3: { type: 'image', content: `${url}/images/tree3.png`, scale: 0.31 },
+  tree4: { type: 'image', content: `${url}/images/tree4.png`, scale: 0.33 },
+  reed1: { type: 'image', content: `${url}/images/reed1.png`, scale: 0.15 },
+  reed2: { type: 'image', content: `${url}/images/reed2.png`, scale: 0.15 },
   moreStones: { type: 'image', content: `${url}/images/stone.png`, scale: 0.14 },
   none: { type: 'svg', content: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">  </svg>` }
 };
@@ -26,20 +29,24 @@ const TERRAIN_DETAIL_MAPPING = [
   {
     terrain: 'GRASS', details:
       [
-        'flower1',
         'flower2',
         'flower3',
         'flower4',
         'flower5',
         'flower6',
         'stick',
-        'bush'],
-    weights: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2, 0.2], detailCache: 0.3
+        'tree4'],
+    weights: [0.1, 0.2, 0.1, 0.1, 0.1, 0.2, 0.1], detailCache: 0.2
   },
-  { terrain: 'FOREST', details: ['bush'], weights: [1], detailChance: 0.9 },
+  {
+    terrain: 'FOREST', details: [
+      'tree1', 'tree2', 'tree3',
+    ], weights: [0.3, 0.3, 0.4], detailChance: 0.95
+  },
+
   { terrain: 'MOUNTAIN', details: ['stone', 'moreStones'], weights: [0.7, 0.3] },
   { terrain: 'SAND', details: ['stick', 'bush'], weights: [0.8, 0.2] },
-  { terrain: 'LAKE', details: ['lilyPad', "reed1", "reed2"], weights: [0.2, 0.4, 0.4], detailChance: 0.3 },
+  { terrain: 'LAKE', details: ['lilyPad', "reed1", "reed2"], weights: [0.4, 0.4, 0.2], detailChance: 0.3 },
   { terrain: 'DEEP LAKE', details: ['lilyPad', "none"], weights: [0, 1] },
   { terrain: 'MOUNTAINPEAK', details: ['stone', 'moreStones'], weights: [0.7, 0.3] },
   { terrain: 'SNOW', details: ['none'], weights: [1] },
