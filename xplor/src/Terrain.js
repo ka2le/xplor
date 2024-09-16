@@ -5,6 +5,9 @@ import { adjustColor } from './utils';
 import { setupInteraction } from './scrolling';
 import { NUM_NOISE_MAPS, TILE_SIZE, CHUNK_SIZE, VISIBLE_TILES, DETAIL_CHANCE, LOAD_DISTANCE, TERRAIN_SCALE, TEXTURE_SCALE } from './configs';
 
+const SAVANNA_START = -0.45;
+const SAVANNA_END = -0.35;
+const SAVANNA_THRESHOLD = [SAVANNA_START, SAVANNA_END];
 
 
 const noise_maps_info = [
@@ -27,6 +30,7 @@ export const TERRAIN_INFO = [
     type: 'DEEP LAKE',
     thresholds: [
       { 0: [-Infinity, -0.5] },
+      { 0: [-0.9, -0.85], 2: SAVANNA_THRESHOLD }, // Very small, oasis water in savanna
       { 0: [-Infinity, 0.4], 2: [-1, -0.6] }  //Lake biome
     ],
     colors: { light: 0x3da8eb, dark: 0x3da8eb}
@@ -58,13 +62,7 @@ export const TERRAIN_INFO = [
     ],
     colors: { light: 0x8db731, dark: 0x7AC97A }
   },
-  // {
-  //   type: 'FOREST',
-  //   thresholds: [
-  //     { 0: [-0.1, 0.7], 1: [-0.5, 0.3] },
-  //   ],
-  //   colors: { light: 0x168039, dark: 0x0B421E }
-  // },
+
   {
     type: 'MOUNTAIN',
     thresholds: [
@@ -102,6 +100,33 @@ export const TERRAIN_INFO = [
     ],
     colors: { light: 0x98FB98, dark: 0xFFFFFF, secondary: 0xFFFFFF }
   },
+  {
+    type: 'SAVANNA',
+    thresholds: [
+      { 0: [-0.85, 1], 2: SAVANNA_THRESHOLD } // Savanna biome with smaller noise map 2 range than oceans or snow
+    ],
+    colors: { light: 0xfae984, dark: 0xf2df6b }  // Yellowish dry grass
+  },
+
+  // Add the rare OASIS terrain in deep valleys
+  {
+    type: 'OASIS',
+    thresholds: [
+      { 0: [-1, -0.9], 2: SAVANNA_THRESHOLD }  // Oasis grass next to water in savanna biome
+    ],
+    colors: { light: 0x98FB98, dark: 0x7AC97A }  //green for oasis
+  },
+
+  
+  {
+    type: 'SANDY SAVANNA',
+    thresholds: [
+      { 0: [-0.1, 1], 2: [SAVANNA_START-0.05, SAVANNA_END] },
+      { 0: [-0.1, 1], 2: [SAVANNA_START, SAVANNA_END+0.05] },
+      { 0: [-0.2, 1], 1: [0.3, 0.8], 2: SAVANNA_THRESHOLD }  // Rare sandy patches in savanna
+    ],
+    colors: { light: 0xfae984, dark: 0xFAEBD7 }  // Sand mixed with yellowish grass
+  }
 ];
 
 

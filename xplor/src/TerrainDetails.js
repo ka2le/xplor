@@ -20,6 +20,8 @@ const terrainDetails = {
   tree4: { type: 'image', content: `${url}/images/tree4.png`, scale: 0.33 },
   reed1: { type: 'image', content: `${url}/images/reed1.png`, scale: 0.15 },
   reed2: { type: 'image', content: `${url}/images/reed2.png`, scale: 0.15 },
+  sgrass: { type: 'image', content: `${url}/images/sgrass.png`, scale: 0.15 },
+  sgrass2: { type: 'image', content: `${url}/images/sgrass2.png`, scale: 0.15 },
   moreStones: { type: 'image', content: `${url}/images/stone.png`, scale: 0.14 },
   none: { type: 'svg', content: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">  </svg>` }
 };
@@ -47,13 +49,13 @@ const TERRAIN_DETAIL_MAPPING = [
   { terrain: 'MOUNTAIN', details: ['stone', 'moreStones'], weights: [0.7, 0.3] },
   { terrain: 'SAND', details: ['stick', 'bush'], weights: [0.8, 0.2] },
   { terrain: 'LAKE', details: ['lilyPad', "reed1", "reed2"], weights: [0.4, 0.4, 0.2], detailChance: 0.3 },
-  { terrain: 'DEEP LAKE', details: ['lilyPad', "none"], weights: [0, 1] },
+  { terrain: 'DEEP LAKE', details: ['lilyPad'], weights: [0], detailChance:0  },
   { terrain: 'MOUNTAINPEAK', details: ['stone', 'moreStones'], weights: [0.7, 0.3] },
-  { terrain: 'SNOW', details: ['none'], weights: [1] },
-  { terrain: 'ICE', details: ['none'], weights: [1] },
-  { terrain: 'SNOWY GRASS', details: ['none'], weights: [1] },
-
-
+  { terrain: 'SNOW', details: ['none'], weights: [1], detailChance:0  },
+  { terrain: 'ICE', details: ['none'], weights: [1] , detailChance:0 },
+  { terrain: 'SNOWY GRASS', details: ['none'], weights: [1], detailChance:0 },
+  { terrain: 'SAVANNA', details: ['sgrass', 'sgrass2'], weights: [0.5,0.5], detailChance: 0.2 },
+  { terrain: 'SANDY SAVANNA', details: ['sgrass', 'sgrass2'], weights: [0.5,0.5], detailChance: 0.1 },
 ];
 
 const DEFAULT_DETAIL = 'none';
