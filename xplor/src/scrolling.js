@@ -39,18 +39,33 @@ export function setupInteraction( tileCache, noiseMaps, app,chunks,simplex, worl
 }
 
 
-function checkChunkGeneration( tileCache, noiseMaps, app,chunks,simplex, worldContainer,detailCache) {
+function checkChunkGeneration(tileCache, noiseMaps, app, chunks, simplex, worldContainer, detailCache) {
     const cameraX = -worldContainer.position.x / TILE_SIZE;
     const cameraY = -worldContainer.position.y / TILE_SIZE;
-
-    const minChunkX = Math.floor((cameraX - LOAD_DISTANCE) / CHUNK_SIZE);
-    const maxChunkX = Math.ceil((cameraX + VISIBLE_TILES + LOAD_DISTANCE) / CHUNK_SIZE);
-    const minChunkY = Math.floor((cameraY - LOAD_DISTANCE) / CHUNK_SIZE);
-    const maxChunkY = Math.ceil((cameraY + VISIBLE_TILES + LOAD_DISTANCE) / CHUNK_SIZE);
-
+  
+    const minChunkX = Math.floor((cameraX - LOAD_DISTANCE * CHUNK_SIZE) / CHUNK_SIZE);
+    const maxChunkX = Math.floor((cameraX + app.renderer.width / TILE_SIZE + LOAD_DISTANCE * CHUNK_SIZE) / CHUNK_SIZE);
+    const minChunkY = Math.floor((cameraY - LOAD_DISTANCE * CHUNK_SIZE) / CHUNK_SIZE);
+    const maxChunkY = Math.floor((cameraY + app.renderer.height / TILE_SIZE + LOAD_DISTANCE * CHUNK_SIZE) / CHUNK_SIZE);
+  
+    const neededChunks = new Set();
+  
     for (let x = minChunkX; x <= maxChunkX; x++) {
       for (let y = minChunkY; y <= maxChunkY; y++) {
-        generateChunk(x, y, tileCache, noiseMaps, app,chunks,simplex, worldContainer,detailCache);
+        const chunkKey = `${x},${y}`;
+        neededChunks.add(chunkKey);
+        if (!chunks[chunkKey]) {
+          generateChunk(x, y, tileCache, noiseMaps, app, chunks, simplex, worldContainer, detailCache);
+        }
+      }
+    }
+  
+    // Unload chunks that are no longer needed
+    for (const chunkKey in chunks) {
+      if (!neededChunks.has(chunkKey)) {
+        worldContainer.removeChild(chunks[chunkKey]);
+        delete chunks[chunkKey];
       }
     }
   }
+  

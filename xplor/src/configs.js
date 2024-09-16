@@ -1,9 +1,9 @@
 // Constants
 export const TILE_SIZE = 80;
-export const VISIBLE_TILES = 10;
-export const CHUNK_SIZE = 64;
-export const LOAD_DISTANCE = 35;
-export const NUM_NOISE_MAPS = 10;
+export const VISIBLE_TILES = 8;
+export const CHUNK_SIZE = 16;
+export const LOAD_DISTANCE = 10;
+export const NUM_NOISE_MAPS = 1;
 export const DETAIL_CHANCE = 0.15;
 
 // Noise settings

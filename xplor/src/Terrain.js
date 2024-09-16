@@ -226,15 +226,14 @@ export function generateChunk(chunkX, chunkY, tileCache, noiseMaps, app, chunks,
 }
 
 
-
 function getShadedTerrainColor(terrain, noise) {
+  noise = Math.round(noise * 20) / 20; // Quantize noise to steps of 0.1
   const { light, dark } = TERRAIN_INFO.find(t => t.type === terrain).colors;
 
   const r = ((light >> 16) + ((dark >> 16) - (light >> 16)) * noise) / 255;
   const g = (((light >> 8) & 0xFF) + (((dark >> 8) & 0xFF) - ((light >> 8) & 0xFF)) * noise) / 255;
   const b = ((light & 0xFF) + ((dark & 0xFF) - (light & 0xFF)) * noise) / 255;
 
-  // Create a PIXI Color object and convert it to a number
   const color = new PIXI.Color([r, g, b]);
   return color.toNumber();
 }
