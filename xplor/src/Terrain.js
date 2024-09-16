@@ -56,8 +56,15 @@ export const TERRAIN_INFO = [
     thresholds: [
       { 0: [-0.1, 0.7], 1: [-0.5, 0.3] },
     ],
-    colors: { light: 0x168039, dark: 0x0B421E }
+    colors: { light: 0x8db731, dark: 0x7AC97A }
   },
+  // {
+  //   type: 'FOREST',
+  //   thresholds: [
+  //     { 0: [-0.1, 0.7], 1: [-0.5, 0.3] },
+  //   ],
+  //   colors: { light: 0x168039, dark: 0x0B421E }
+  // },
   {
     type: 'MOUNTAIN',
     thresholds: [
@@ -174,13 +181,8 @@ export function generateChunk(chunkX, chunkY, tileCache, noiseMaps, app, chunks,
       tile.position.set(x * TILE_SIZE, y * TILE_SIZE);
       chunkContainer.addChild(tile);
 
-      if (Math.random() < DETAIL_CHANCE) {
-        const detail = createTerrainDetail(terrain, detailCache);
-        if (detail) {
-          detail.position.set(x * TILE_SIZE, y * TILE_SIZE);
-          chunkContainer.addChild(detail);
-        }
-      }
+      createTerrainDetail(terrain, detailCache, x, y, chunkContainer);
+
     }
   }
 
