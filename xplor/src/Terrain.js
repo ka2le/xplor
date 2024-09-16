@@ -5,9 +5,19 @@ import { adjustColor } from './utils';
 import { setupInteraction } from './scrolling';
 import { NUM_NOISE_MAPS, TILE_SIZE, CHUNK_SIZE, VISIBLE_TILES, DETAIL_CHANCE, LOAD_DISTANCE, TERRAIN_SCALE, TEXTURE_SCALE } from './configs';
 
-const SAVANNA_START = -0.45;
-const SAVANNA_END = -0.35;
+const SAVANNA_START = -0.65;
+const SAVANNA_END = -0.55;
 const SAVANNA_THRESHOLD = [SAVANNA_START, SAVANNA_END];
+
+const SNOW_BIOME_START = 0.75;
+const SNOW_BIOME_END = 1;
+const SNOW_BIOME_THRESHOLD = [SNOW_BIOME_START, SNOW_BIOME_END];
+
+const OCEAN_START = -1;
+const OCEAN_END = -0.75;
+const OCEAN_THRESHOLD = [OCEAN_START, OCEAN_END];
+
+const BIOME_EDGE = 0.03;
 
 
 const noise_maps_info = [
@@ -22,7 +32,7 @@ export const TERRAIN_INFO = [
     type: 'LAKE',
     thresholds: [
       { 0: [-0.5, -0.3] },
-      { 0: [0.4, 0.8], 2: [-1, -0.6] }  //Lake biome
+      { 0: [0.4, 0.8], 2: OCEAN_THRESHOLD }  //Shallow part of Ocean biome
     ],
     colors: { light: 0x87CEFA, dark: 0x82C7F5 }
   },
@@ -31,7 +41,7 @@ export const TERRAIN_INFO = [
     thresholds: [
       { 0: [-Infinity, -0.5] },
       { 0: [-0.9, -0.85], 2: SAVANNA_THRESHOLD }, // Very small, oasis water in savanna
-      { 0: [-Infinity, 0.4], 2: [-1, -0.6] }  //Lake biome
+      { 0: [-Infinity, 0.4], 2: OCEAN_THRESHOLD }  //Ocean biome
     ],
     colors: { light: 0x3da8eb, dark: 0x3da8eb}
   },
@@ -39,9 +49,9 @@ export const TERRAIN_INFO = [
     type: 'SAND',
     thresholds: [
       { 0: [-0.3, -0.1] },
-      { 0: [0.8, 1], 2: [-1, -0.6] },  // Sand islands in ocean biome
-      { 0: [-0.1, 1], 1: [-0.5, 0.3], 2: [-0.6, -0.5] },  // Sand edges to ocean biome
-      { 0: [0.7, 1],  2: [-0.6, -0.5] },  // Sand edges to ocean biome
+      { 0: [0.8, 1], 2: [OCEAN_THRESHOLD] },  // Sand islands in ocean biome
+      { 0: [-0.1, 1], 1: [-0.5, 0.3], 2: [OCEAN_END, OCEAN_END+BIOME_EDGE] },  // Sand edges to ocean biome
+      { 0: [0.7, 1],  2: [OCEAN_END, OCEAN_END+BIOME_EDGE] },  // Sand edges to ocean biome
 
     ],
     colors: { light: 0xFAEBD7, dark: 0xFAEBD7, secondary: 0xFAEBD7 }
@@ -80,15 +90,15 @@ export const TERRAIN_INFO = [
   {
     type: 'SNOW',
     thresholds: [
-      { 0: [-0.7, 1], 2: [0.6, Infinity] }  // Snow biome
+      { 0: [-0.7, 1], 2: SNOW_BIOME_THRESHOLD }  // Snow biome
     ],
     colors: { light: 0xFFFFFF, dark: 0xFFFFFF }
   },
   {
     type: 'ICE',
     thresholds: [
-      { 0: [-1, -0.7], 2: [0.6, Infinity] },  // Snow biome Ice Lakes
-      { 0: [-1, -0.1], 2: [0.5,0.6] }  // Snow biome Edge Ice Lakes
+      { 0: [-1, -0.7], 2: SNOW_BIOME_THRESHOLD },  // Snow biome Ice Lakes
+      { 0: [-1, -0.1], 2: [SNOW_BIOME_START-BIOME_EDGE,SNOW_BIOME_START] }  // Snow biome Edge Ice Lakes
     ],
     colors: { light: 0xBDDEEC, dark: 0xD7EBF3 }
   },
@@ -96,7 +106,7 @@ export const TERRAIN_INFO = [
   {
     type: 'SNOWY GRASS',
     thresholds: [
-      { 0: [-0.2, 1], 2: [0.5, 0.6] }  // Snow biome edge grass
+      { 0: [-0.2, 1], 2: [SNOW_BIOME_START-BIOME_EDGE, SNOW_BIOME_START] }  // Snow biome edge grass
     ],
     colors: { light: 0x98FB98, dark: 0xFFFFFF, secondary: 0xFFFFFF }
   },
@@ -121,8 +131,8 @@ export const TERRAIN_INFO = [
   {
     type: 'SANDY SAVANNA',
     thresholds: [
-      { 0: [-0.1, 1], 2: [SAVANNA_START-0.05, SAVANNA_END] },
-      { 0: [-0.1, 1], 2: [SAVANNA_START, SAVANNA_END+0.05] },
+      { 0: [-0.1, 1], 2: [SAVANNA_START-BIOME_EDGE, SAVANNA_START] },
+      { 0: [-0.1, 1], 2: [SAVANNA_END, SAVANNA_END+BIOME_EDGE] },
       { 0: [-0.2, 1], 1: [0.3, 0.8], 2: SAVANNA_THRESHOLD }  // Rare sandy patches in savanna
     ],
     colors: { light: 0xfae984, dark: 0xFAEBD7 }  // Sand mixed with yellowish grass
