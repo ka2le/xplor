@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 import { Color } from 'pixi.js';
-import { generateTerrainDetails,createTerrainDetail } from './TerrainDetails';
+import { generateTerrainDetails,createTerrainDetail,  } from './TerrainDetails';
 import { adjustColor } from './utils';
 import { setupInteraction } from './scrolling';
-import { generateChunk } from './Terrain';
+import { generateChunk,generateTextureNoiseMaps } from './Terrain';
 
 import { createNoise2D } from 'simplex-noise';
 import { NUM_NOISE_MAPS, TILE_SIZE, CHUNK_SIZE, VISIBLE_TILES, DETAIL_CHANCE,TERRAIN_SCALE,TEXTURE_SCALE } from './configs';
@@ -25,40 +25,27 @@ function App() {
     const worldContainer = new PIXI.Container();
     app.stage.addChild(worldContainer);
     const simplex = createNoise2D();
-    const noiseMaps = [];
+    const textureNoiseMaps = [];
     const chunks = {};
     const tileCache = new Map();
     const detailCache = new Map();
 
-    function generateNoiseMaps() {
-      for (let i = 0; i < NUM_NOISE_MAPS; i++) {
-        const noiseMap = new Array(TILE_SIZE * TILE_SIZE);
-        for (let y = 0; y < TILE_SIZE; y++) {
-          for (let x = 0; x < TILE_SIZE; x++) {
-            const noise = simplex(x * 0.1, y * 0.1);
-            noiseMap[y * TILE_SIZE + x] = (noise + 1) / 2;
-          }
-        }
-        noiseMaps.push(noiseMap);
-      }
-    }
-
     function generateWorld() {
-      generateNoiseMaps();
+      generateTextureNoiseMaps(textureNoiseMaps);
       generateTerrainDetails(detailCache);
       const centerChunkX = Math.floor(VISIBLE_TILES / 2 / CHUNK_SIZE);
       const centerChunkY = Math.floor(VISIBLE_TILES / 2 / CHUNK_SIZE);
 
       for (let x = -1; x <= 1; x++) {
         for (let y = -1; y <= 1; y++) {
-          generateChunk(centerChunkX + x, centerChunkY + y,  tileCache, noiseMaps, app,chunks,simplex, worldContainer,detailCache);
+          generateChunk(centerChunkX + x, centerChunkY + y,  tileCache, textureNoiseMaps, app,chunks,simplex, worldContainer,detailCache);
         }
       }
     }
 
     // Initialize
     generateWorld();
-    setupInteraction( tileCache, noiseMaps, app,chunks,simplex, worldContainer,detailCache);
+    setupInteraction( tileCache, textureNoiseMaps, app,chunks,simplex, worldContainer,detailCache);
 
     return () => {
       app.destroy(true, true);

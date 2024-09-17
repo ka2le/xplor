@@ -1,20 +1,20 @@
 import * as PIXI from 'pixi.js';
 import { Color } from 'pixi.js';
 import { createTerrainDetail } from './TerrainDetails';
-import { adjustColor } from './utils';
 import { setupInteraction } from './scrolling';
+import { createNoise2D } from 'simplex-noise';
 import { NUM_NOISE_MAPS, TILE_SIZE, CHUNK_SIZE, VISIBLE_TILES, DETAIL_CHANCE, LOAD_DISTANCE, TERRAIN_SCALE, TEXTURE_SCALE } from './configs';
 
 const SAVANNA_START = -0.65;
 const SAVANNA_END = -0.55;
 const SAVANNA_THRESHOLD = [SAVANNA_START, SAVANNA_END];
 
-const SNOW_BIOME_START = 0.75;
+const SNOW_BIOME_START = 0.05;
 const SNOW_BIOME_END = 1;
 const SNOW_BIOME_THRESHOLD = [SNOW_BIOME_START, SNOW_BIOME_END];
 
 const OCEAN_START = -1;
-const OCEAN_END = -0.75;
+const OCEAN_END = -0.55;
 const OCEAN_THRESHOLD = [OCEAN_START, OCEAN_END];
 
 const BIOME_EDGE = 0.03;
@@ -30,6 +30,7 @@ const noise_maps_info = [
 export const TERRAIN_INFO = [
   {
     type: 'LAKE',
+    textureType:3,
     thresholds: [
       { 0: [-0.5, -0.3] },
       { 0: [0.4, 0.8], 2: OCEAN_THRESHOLD }  //Shallow part of Ocean biome
@@ -38,26 +39,29 @@ export const TERRAIN_INFO = [
   },
   {
     type: 'DEEP LAKE',
+    textureType:3,
     thresholds: [
       { 0: [-Infinity, -0.5] },
       { 0: [-0.9, -0.85], 2: SAVANNA_THRESHOLD }, // Very small, oasis water in savanna
-      { 0: [-Infinity, 0.4], 2: OCEAN_THRESHOLD }  //Ocean biome
+      { 0: [-Infinity, 0.4], 2: OCEAN_THRESHOLD },  //Ocean biome
     ],
-    colors: { light: 0x3da8eb, dark: 0x3da8eb}
+    colors: { light: 0x3da8eb, dark: 0x3da8eb }
   },
   {
     type: 'SAND',
+    textureType:1,
     thresholds: [
       { 0: [-0.3, -0.1] },
       { 0: [0.8, 1], 2: [OCEAN_THRESHOLD] },  // Sand islands in ocean biome
-      { 0: [-0.1, 1], 1: [-0.5, 0.3], 2: [OCEAN_END, OCEAN_END+BIOME_EDGE] },  // Sand edges to ocean biome
-      { 0: [0.7, 1],  2: [OCEAN_END, OCEAN_END+BIOME_EDGE] },  // Sand edges to ocean biome
+      { 0: [-0.1, 1], 1: [-0.5, 0.3], 2: [OCEAN_END, OCEAN_END + BIOME_EDGE] },  // Sand edges to ocean biome
+      { 0: [0.7, 1], 2: [OCEAN_END, OCEAN_END + BIOME_EDGE] },  // Sand edges to ocean biome
 
     ],
     colors: { light: 0xFAEBD7, dark: 0xFAEBD7, secondary: 0xFAEBD7 }
   },
   {
     type: 'GRASS',
+    
     thresholds: [
       { 0: [-0.1, 0.7] },
       { 0: [-0.1, 0.7], 1: [0, 3, 0.7] },
@@ -75,6 +79,7 @@ export const TERRAIN_INFO = [
 
   {
     type: 'MOUNTAIN',
+    textureType:2,
     thresholds: [
       { 0: [0.4, 0.85] }
     ],
@@ -82,6 +87,7 @@ export const TERRAIN_INFO = [
   },
   {
     type: 'MOUNTAINPEAK',
+    textureType:2,
     thresholds: [
       { 0: [0.85, Infinity] }
     ],
@@ -96,9 +102,10 @@ export const TERRAIN_INFO = [
   },
   {
     type: 'ICE',
+    textureType:4,
     thresholds: [
       { 0: [-1, -0.7], 2: SNOW_BIOME_THRESHOLD },  // Snow biome Ice Lakes
-      { 0: [-1, -0.1], 2: [SNOW_BIOME_START-BIOME_EDGE,SNOW_BIOME_START] }  // Snow biome Edge Ice Lakes
+      { 0: [-1, -0.1], 2: [SNOW_BIOME_START - BIOME_EDGE, SNOW_BIOME_START] }  // Snow biome Edge Ice Lakes
     ],
     colors: { light: 0xBDDEEC, dark: 0xD7EBF3 }
   },
@@ -106,7 +113,7 @@ export const TERRAIN_INFO = [
   {
     type: 'SNOWY GRASS',
     thresholds: [
-      { 0: [-0.2, 1], 2: [SNOW_BIOME_START-BIOME_EDGE, SNOW_BIOME_START] }  // Snow biome edge grass
+      { 0: [-0.2, 1], 2: [SNOW_BIOME_START - BIOME_EDGE, SNOW_BIOME_START] }  // Snow biome edge grass
     ],
     colors: { light: 0x98FB98, dark: 0xFFFFFF, secondary: 0xFFFFFF }
   },
@@ -127,12 +134,13 @@ export const TERRAIN_INFO = [
     colors: { light: 0x98FB98, dark: 0x7AC97A }  //green for oasis
   },
 
-  
+
   {
     type: 'SANDY SAVANNA',
+    textureType:1,
     thresholds: [
-      { 0: [-0.1, 1], 2: [SAVANNA_START-BIOME_EDGE, SAVANNA_START] },
-      { 0: [-0.1, 1], 2: [SAVANNA_END, SAVANNA_END+BIOME_EDGE] },
+      { 0: [-0.1, 1], 2: [SAVANNA_START - BIOME_EDGE, SAVANNA_START] },
+      { 0: [-0.1, 1], 2: [SAVANNA_END, SAVANNA_END + BIOME_EDGE] },
       { 0: [-0.2, 1], 1: [0.3, 0.8], 2: SAVANNA_THRESHOLD }  // Rare sandy patches in savanna
     ],
     colors: { light: 0xfae984, dark: 0xFAEBD7 }  // Sand mixed with yellowish grass
@@ -214,7 +222,7 @@ export function generateChunk(chunkX, chunkY, tileCache, noiseMaps, app, chunks,
       const baseColor = light ?? 0x000000;
       const secondColor = TERRAIN_INFO.find(t => t.type === terrain).colors?.secondary ?? baseColor;
 
-      const tile = createTexturedTile(baseColor, secondColor, tileCache, noiseMaps, app);
+      const tile = createTexturedTile(terrain,baseColor, secondColor, tileCache, noiseMaps, app);
       tile.position.set(x * TILE_SIZE, y * TILE_SIZE);
       chunkContainer.addChild(tile);
 
@@ -229,13 +237,13 @@ export function generateChunk(chunkX, chunkY, tileCache, noiseMaps, app, chunks,
 
 
 
-export function createTexturedTile(baseColor, secondColor, tileCache, noiseMaps, app) {
+export function createTexturedTile(terrain,baseColor, secondColor, tileCache, noiseMaps, app) {
   const cacheKey = baseColor.toString(16).padStart(6, '0');
   if (tileCache.has(cacheKey)) {
     return new PIXI.Sprite(tileCache.get(cacheKey));
   }
-
-  const noiseMap = noiseMaps[Math.floor(Math.random() * NUM_NOISE_MAPS)];
+  const textureType = TERRAIN_INFO.find(t => t.type === terrain)?.textureType ?? 0;
+  const noiseMap = noiseMaps[textureType];
   const graphics = new PIXI.Graphics();
   // Fill background with base color
   graphics.beginFill(baseColor);
@@ -261,4 +269,153 @@ export function createTexturedTile(baseColor, secondColor, tileCache, noiseMaps,
   tileCache.set(cacheKey, texture);
 
   return new PIXI.Sprite(texture);
+}
+
+export function generateTextureNoiseMaps(textureNoiseMaps) {
+  const simplex = createNoise2D();
+  const basicSimplexTexture = new Array(TILE_SIZE * TILE_SIZE);
+  for (let y = 0; y < TILE_SIZE; y++) {
+    for (let x = 0; x < TILE_SIZE; x++) {
+      const noise = simplex(x * 0.1, y * 0.1);
+      basicSimplexTexture[y * TILE_SIZE + x] = (noise + 1) / 2;
+    }
+  }
+
+  const perlin = createNoise2D();
+  const fractal = createNoise2D();
+  const sandTexture = new Array(TILE_SIZE * TILE_SIZE);
+  for (let y = 0; y < TILE_SIZE; y++) {
+    for (let x = 0; x < TILE_SIZE; x++) {
+      const baseNoise = perlin(x * 0.24, y * 0.24);
+      const detailNoise = fractal(x * 1, y * 1);
+      sandTexture[y * TILE_SIZE + x] = (baseNoise * 0.8 + detailNoise * 0.2 + 1) / 2;
+    }
+  }
+
+ // Generate rock texture using Voronoi
+ const voronoi = generateVoronoi(TILE_SIZE, TILE_SIZE, 250); // 20 Voronoi points
+ const rockTexture = new Array(TILE_SIZE * TILE_SIZE);
+ for (let y = 0; y < TILE_SIZE; y++) {
+   for (let x = 0; x < TILE_SIZE; x++) {
+     rockTexture[y * TILE_SIZE + x] = voronoi[y * TILE_SIZE + x];
+   }
+ }
+
+ const waterTexture = generateWaterTexture(TILE_SIZE, TILE_SIZE);
+ const iceTexture = generateIceTexture(TILE_SIZE, TILE_SIZE);
+
+  textureNoiseMaps.push(basicSimplexTexture);
+  textureNoiseMaps.push(sandTexture);
+  textureNoiseMaps.push(rockTexture);
+  textureNoiseMaps.push(waterTexture);
+  textureNoiseMaps.push(iceTexture);
+}
+
+function adjustColor(baseColor, secondColor, noise) {
+  let r = (baseColor >> 16) & 0xFF;
+  let g = (baseColor >> 8) & 0xFF;
+  let b = baseColor & 0xFF;
+  if (secondColor == 0x7AC97A) {
+    console.log("second color is 7AC97A");
+  }
+  const factor = 0.95 + noise * 0.1;
+  if (noise > 0.5) {
+    r = (secondColor >> 16) & 0xFF;
+    g = (secondColor >> 8) & 0xFF;
+    b = secondColor & 0xFF;
+  }
+
+  const newR = Math.min(255, Math.max(0, Math.floor(r * factor)));
+  const newG = Math.min(255, Math.max(0, Math.floor(g * factor)));
+  const newB = Math.min(255, Math.max(0, Math.floor(b * factor)));
+
+  return (newR << 16) | (newG << 8) | newB;
+}
+
+
+function generateVoronoi(width, height, numPoints) {
+  const points = [];
+  for (let i = 0; i < numPoints; i++) {
+    points.push({
+      x: Math.random() * width,
+      y: Math.random() * height
+    });
+  }
+
+  const voronoi = new Array(width * height);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let minDist = Infinity;
+      let closestPointIndex = 0;
+      for (let i = 0; i < points.length; i++) {
+        const dx = x - points[i].x;
+        const dy = y - points[i].y;
+        const dist = dx * dx + dy * dy; // Using squared distance for efficiency
+        if (dist < minDist) {
+          minDist = dist;
+          closestPointIndex = i;
+        }
+      }
+      voronoi[y * width + x] = (closestPointIndex / (numPoints - 1))*2-1; // Normalize to 0-1 range
+    }
+  }
+  return voronoi;
+}
+function generateWaterTexture(width, height) {
+  const waterTexture = new Array(width * height);
+  const simplex = createNoise2D();
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      // High-frequency base wave
+      let value = Math.sin(y * 3.0) * 0.5; // Faster, small up/down
+      value += Math.sin(y * 6.0) * 0.3; // Even higher frequency
+      
+      // Additional layers for complexity (using varying frequencies and amplitudes)
+      value += Math.sin(y * 10.0) * 0.15;
+      value += Math.sin(y * 15.0 + x * 0.5) * 0.1; // Adding horizontal influence
+      
+      // Add horizontal displacement to break symmetry
+      value += Math.sin(x * 2.0 + y * 0.2) * 0.05;
+      
+      // Introduce noise to simulate interference
+      const noise1 = simplex(x * 0.1, y * 0.1) * 0.3;
+      const noise2 = simplex(x * 0.05 + 100, y * 0.5) * 0.15; // Second noise layer for randomness
+      value += noise1 + noise2;
+
+      // Normalize using tanh for smoother contrast
+      value = Math.tanh(value * 1.5);
+
+      waterTexture[y * width + x] = value;
+    }
+  }
+
+  return waterTexture;
+}
+
+function generateIceTexture(width, height) {
+  const iceTexture = new Array(width * height);
+  const simplex = createNoise2D();
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      // Base vertical wave pattern by swapping x and y
+      let value = Math.sin(y * 0.1) * 0.3;  // Vertical base wave, reduced intensity
+
+      // Add more stretched vertical waves
+      value += Math.sin(y * 0.2) * 0.2;    // Slight variation in wave pattern, no x dependency
+      value += Math.sin(y * 0.05) * 0.1;   // Very stretched vertical waves for smear
+
+      // Add vertically stretched random noise
+      const noise = simplex(y * 0.01, x * 0.001);  // Stretch the noise heavily in y direction
+      value += noise * 0.5;  // Increase the impact of the noise for randomness
+
+      // Normalize to 0-1 range
+      value = ((value + 1) * 0.5)*2-1;
+
+      iceTexture[y * width + x] = value;
+    }
+  }
+
+  return iceTexture;
 }
