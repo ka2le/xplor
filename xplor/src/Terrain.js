@@ -70,7 +70,7 @@ export const TERRAIN_INFO = [
     thresholds: [
       { 0: [-0.1, 0.7], 1: [-0.5, 0.3] },
     ],
-    colors: { light: 0x8db731, dark: 0x7AC97A }
+    colors: { light: 0x81a82a, dark: 0x7AC97A }
   },
 
   {
@@ -209,7 +209,9 @@ export function generateChunk(chunkX, chunkY, tileCache, noiseMaps, app, chunks,
 
       const noiseValues = getNoiseValues(worldX, worldY, simplex);
       const terrain = determineTerrainType(noiseValues);
-      const baseColor = getShadedTerrainColor(terrain, (noiseValues[0] + 1) / 2);
+      const { light, dark } = TERRAIN_INFO.find(t => t.type === terrain).colors;
+
+      const baseColor = light ?? 0x000000;
       const secondColor = TERRAIN_INFO.find(t => t.type === terrain).colors?.secondary ?? baseColor;
 
       const tile = createTexturedTile(baseColor, secondColor, tileCache, noiseMaps, app);
@@ -225,18 +227,6 @@ export function generateChunk(chunkX, chunkY, tileCache, noiseMaps, app, chunks,
   chunks[chunkKey] = chunkContainer;
 }
 
-
-function getShadedTerrainColor(terrain, noise) {
-  noise = Math.round(noise * 20) / 20; // Quantize noise to steps of 0.1
-  const { light, dark } = TERRAIN_INFO.find(t => t.type === terrain).colors;
-
-  const r = ((light >> 16) + ((dark >> 16) - (light >> 16)) * noise) / 255;
-  const g = (((light >> 8) & 0xFF) + (((dark >> 8) & 0xFF) - ((light >> 8) & 0xFF)) * noise) / 255;
-  const b = ((light & 0xFF) + ((dark & 0xFF) - (light & 0xFF)) * noise) / 255;
-
-  const color = new PIXI.Color([r, g, b]);
-  return color.toNumber();
-}
 
 
 export function createTexturedTile(baseColor, secondColor, tileCache, noiseMaps, app) {
