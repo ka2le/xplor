@@ -74,7 +74,7 @@ export const TERRAIN_INFO = [
     thresholds: [
       { 0: [-0.1, 0.7], 1: [-0.5, 0.3] },
     ],
-    colors: { light: 0x81a82a, dark: 0x7AC97A }
+    colors: { light: 0x81a82a, dark: 0x4E814E }
   },
 
   {
